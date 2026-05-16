@@ -1,0 +1,2447 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Amazon India — Sales Intelligence Dashboard</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Outfit:wght@700;800;900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #0B1120;
+  --surface: #111827;
+  --card: #111827;
+  --border: rgba(148, 163, 184, 0.18);
+  --border2: rgba(148, 163, 184, 0.34);
+  --amazon: #F59E0B;
+  --amazon2: #F97316;
+  --amazon-light: rgba(245, 158, 11, 0.14);
+  --amazon-mid: rgba(245, 158, 11, 0.22);
+  --blue: #38BDF8;
+  --blue-light: rgba(56, 189, 248, 0.13);
+  --green: #34D399;
+  --green-light: rgba(52, 211, 153, 0.13);
+  --purple: #A78BFA;
+  --purple-light: rgba(167, 139, 250, 0.14);
+  --red: #FB7185;
+  --red-light: rgba(251, 113, 133, 0.14);
+  --yellow: #FBBF24;
+  --yellow-light: rgba(251, 191, 36, 0.14);
+  --text: #F8FAFC;
+  --text2: #CBD5E1;
+  --text3: #94A3B8;
+  --text4: #64748B;
+  --shadow: 0 16px 42px rgba(0,0,0,0.22), inset 0 1px 0 rgba(255,255,255,0.02);
+  --shadow-md: 0 22px 56px rgba(0,0,0,0.28), inset 0 1px 0 rgba(255,255,255,0.03);
+  --shadow-lg: 0 30px 80px rgba(0,0,0,0.36), inset 0 1px 0 rgba(255,255,255,0.04);
+  --radius: 14px;
+  --radius-sm: 8px;
+}
+
+html { scroll-behavior: smooth; }
+body {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  background:
+    radial-gradient(circle at top left, rgba(56,189,248,0.12), transparent 28%),
+    linear-gradient(180deg, #0B1120 0%, #0F172A 58%, #111827 100%);
+  color: var(--text);
+  min-height: 100vh;
+  font-size: 14px;
+}
+
+/* ── HEADER ── */
+.header {
+  background: rgba(15, 23, 42, 0.92);
+  backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--border);
+  padding: 0 32px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 68px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: 0 1px 0 var(--border), 0 12px 30px rgba(0,0,0,0.22);
+}
+
+.logo-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.logo-box {
+  width: 40px; height: 40px;
+  background: linear-gradient(135deg, var(--amazon), var(--amazon2));
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 20px;
+  box-shadow: 0 4px 12px rgba(255,106,0,0.3);
+}
+
+.logo-title {
+  font-family: 'Outfit', sans-serif;
+  font-size: 20px;
+  font-weight: 800;
+  letter-spacing: -0.3px;
+  color: var(--text);
+}
+.logo-title em { color: var(--amazon); font-style: normal; }
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.header-stat {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 6px 14px;
+  font-size: 12px;
+}
+.header-stat strong { color: var(--text); font-weight: 600; }
+.header-stat span { color: var(--text3); }
+
+.live-badge {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--green-light);
+  border: 1px solid rgba(5,150,105,0.2);
+  color: var(--green);
+  font-size: 11px;
+  font-weight: 700;
+  padding: 5px 12px;
+  border-radius: 100px;
+  letter-spacing: 0.4px;
+}
+.live-dot {
+  width: 6px; height: 6px;
+  background: var(--green);
+  border-radius: 50%;
+  animation: pulse 1.5s infinite;
+}
+@keyframes pulse {
+  0%,100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.4; transform: scale(0.8); }
+}
+
+/* ── NAV TABS ── */
+.nav-bar {
+  background: rgba(15, 23, 42, 0.86);
+  backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--border);
+  padding: 0 32px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.tab-btn {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 14px 18px;
+  border: none;
+  background: none;
+  cursor: pointer;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text3);
+  border-bottom: 2.5px solid transparent;
+  transition: all 0.2s;
+  white-space: nowrap;
+  position: relative;
+  top: 1px;
+}
+.tab-btn:hover { color: var(--text2); background: var(--bg); border-radius: 6px 6px 0 0; }
+.tab-btn.active { color: var(--amazon); border-bottom-color: var(--amazon); }
+
+.tab-icon { font-size: 15px; }
+
+/* ── MAIN CONTENT ── */
+.wrapper {
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 28px 32px 60px;
+}
+
+.tab-pane { display: none; }
+.tab-pane.active { display: block; }
+
+/* ── KPI GRID ── */
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 14px;
+  margin-bottom: 28px;
+}
+
+.kpi-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px;
+  box-shadow: var(--shadow);
+  transition: all 0.2s;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+}
+.kpi-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+  border-color: var(--border2);
+}
+
+.kpi-card-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+
+.kpi-icon-wrap {
+  width: 40px; height: 40px;
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px;
+  flex-shrink: 0;
+}
+
+.kpi-trend {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 100px;
+}
+.kpi-trend.up { background: var(--green-light); color: var(--green); }
+.kpi-trend.neutral { background: var(--blue-light); color: var(--blue); }
+.kpi-trend.warn { background: var(--yellow-light); color: var(--yellow); }
+
+.kpi-label {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  color: var(--text4);
+  margin-bottom: 4px;
+}
+
+.kpi-value {
+  font-family: 'Outfit', sans-serif;
+  font-size: 30px;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+  line-height: 1;
+  margin-bottom: 4px;
+}
+
+.kpi-sub { font-size: 11px; color: var(--text4); }
+
+.kpi-card.kpi-orange .kpi-icon-wrap { background: var(--amazon-light); }
+.kpi-card.kpi-blue .kpi-icon-wrap { background: var(--blue-light); }
+.kpi-card.kpi-green .kpi-icon-wrap { background: var(--green-light); }
+.kpi-card.kpi-purple .kpi-icon-wrap { background: var(--purple-light); }
+.kpi-card.kpi-red .kpi-icon-wrap { background: var(--red-light); }
+.kpi-card.kpi-orange .kpi-value { color: var(--amazon); }
+.kpi-card.kpi-blue .kpi-value { color: var(--blue); }
+.kpi-card.kpi-green .kpi-value { color: var(--green); }
+.kpi-card.kpi-purple .kpi-value { color: var(--purple); }
+.kpi-card.kpi-red .kpi-value { color: var(--red); }
+
+/* Accent bar on top */
+.kpi-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  border-radius: var(--radius) var(--radius) 0 0;
+}
+.kpi-card.kpi-orange::before { background: linear-gradient(90deg, var(--amazon), var(--amazon2)); }
+.kpi-card.kpi-blue::before { background: var(--blue); }
+.kpi-card.kpi-green::before { background: var(--green); }
+.kpi-card.kpi-purple::before { background: var(--purple); }
+.kpi-card.kpi-red::before { background: var(--red); }
+
+/* ── SECTION HEADER ── */
+.section-hdr {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+.section-hdr-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.section-hdr-left h2 {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text);
+}
+.section-accent {
+  width: 3px; height: 18px;
+  background: linear-gradient(180deg, var(--amazon), var(--amazon2));
+  border-radius: 4px;
+}
+.chip {
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 100px;
+  background: var(--amazon-light);
+  color: var(--amazon);
+  letter-spacing: 0.3px;
+}
+.chip.blue { background: var(--blue-light); color: var(--blue); }
+.chip.green { background: var(--green-light); color: var(--green); }
+
+.section-action {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--amazon);
+  background: none;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 12px;
+  border-radius: 6px;
+  transition: background 0.15s;
+}
+.section-action:hover { background: var(--amazon-light); }
+
+/* ── GRID LAYOUTS ── */
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+.grid-3-1 { display: grid; grid-template-columns: 2fr 1fr; gap: 16px; }
+.grid-1-3 { display: grid; grid-template-columns: 1fr 2fr; gap: 16px; }
+.mb16 { margin-bottom: 16px; }
+.mb24 { margin-bottom: 24px; }
+.mb28 { margin-bottom: 28px; }
+
+/* ── CARD ── */
+.card {
+  background: linear-gradient(180deg, rgba(17,24,39,0.96), rgba(15,23,42,0.98));
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 22px;
+  box-shadow: var(--shadow);
+}
+
+.card-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text2);
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.card-title-left { display: flex; align-items: center; gap: 8px; }
+.card-icon { font-size: 14px; }
+
+/* ── CHART CONTAINERS ── */
+.chart-wrap { position: relative; }
+.h200 { height: 200px; }
+.h220 { height: 220px; }
+.h260 { height: 260px; }
+.h300 { height: 300px; }
+.h320 { height: 320px; }
+.h360 { height: 360px; }
+.h400 { height: 400px; }
+
+/* ── TABLE ── */
+.data-table { width: 100%; border-collapse: collapse; }
+.data-table th {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  color: var(--text4);
+  padding: 8px 12px;
+  text-align: left;
+  background: var(--bg);
+  border-bottom: 1px solid var(--border);
+}
+.data-table td {
+  padding: 11px 12px;
+  border-bottom: 1px solid var(--border);
+  font-size: 12.5px;
+  color: var(--text2);
+  vertical-align: middle;
+}
+.data-table tr:last-child td { border-bottom: none; }
+.data-table tr { transition: background 0.15s; cursor: pointer; }
+.data-table tr:hover td { background: var(--bg); }
+
+.rank-num {
+  width: 24px; height: 24px;
+  border-radius: 6px;
+  display: inline-flex; align-items: center; justify-content: center;
+  font-size: 11px; font-weight: 700;
+  background: var(--bg);
+  color: var(--text3);
+}
+.rank-num.g1 { background: #FEF3C7; color: #B45309; }
+.rank-num.g2 { background: #F1F5F9; color: #475569; }
+.rank-num.g3 { background: #FFF7ED; color: #C2410C; }
+
+.prod-name-cell {
+  max-width: 240px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 6px;
+}
+.badge.red { background: var(--red-light); color: var(--red); }
+.badge.orange { background: var(--amazon-light); color: var(--amazon); }
+.badge.yellow { background: var(--yellow-light); color: var(--yellow); }
+.badge.green { background: var(--green-light); color: var(--green); }
+
+.star { color: #F59E0B; font-size: 11px; }
+
+/* ── HORIZONTAL BARS ── */
+.hbar-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+.hbar-label { 
+  font-size: 12px; 
+  color: var(--text2); 
+  font-weight: 500; 
+  width: 110px; 
+  flex-shrink: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.hbar-track {
+  flex: 1;
+  height: 8px;
+  background: var(--bg);
+  border-radius: 100px;
+  overflow: hidden;
+  position: relative;
+}
+.hbar-fill {
+  height: 100%;
+  border-radius: 100px;
+  width: 0%;
+  transition: width 0.8s cubic-bezier(0.16,1,0.3,1);
+}
+.hbar-val {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text3);
+  width: 45px;
+  text-align: right;
+  flex-shrink: 0;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+/* Thick interactive bars */
+.ibar-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  margin-bottom: 4px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.ibar-row:hover { background: var(--bg); }
+.ibar-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text2);
+  width: 120px;
+  flex-shrink: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.ibar-track {
+  flex: 1;
+  height: 14px;
+  background: var(--bg);
+  border-radius: 100px;
+  overflow: hidden;
+  position: relative;
+  border: 1px solid var(--border);
+}
+.ibar-fill {
+  height: 100%;
+  border-radius: 100px;
+  width: 0%;
+  transition: width 0.9s cubic-bezier(0.16,1,0.3,1);
+  position: relative;
+}
+.ibar-fill::after {
+  content: '';
+  position: absolute;
+  right: 0; top: 0; bottom: 0;
+  width: 3px;
+  background: rgba(255,255,255,0.5);
+  border-radius: 0 100px 100px 0;
+}
+.ibar-val {
+  font-size: 12px;
+  font-weight: 700;
+  width: 55px;
+  text-align: right;
+  flex-shrink: 0;
+  font-family: 'JetBrains Mono', monospace;
+  color: var(--text2);
+}
+
+/* ── DONUT LEGEND ── */
+.donut-legend { margin-top: 12px; }
+.dleg-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 0;
+  border-bottom: 1px solid var(--border);
+  cursor: pointer;
+  border-radius: 4px;
+  padding: 5px 6px;
+  transition: background 0.15s;
+}
+.dleg-row:last-child { border-bottom: none; }
+.dleg-row:hover { background: var(--bg); }
+.dleg-left { display: flex; align-items: center; gap: 8px; }
+.dleg-dot { width: 8px; height: 8px; border-radius: 2px; flex-shrink: 0; }
+.dleg-name { font-size: 12px; color: var(--text2); font-weight: 500; }
+.dleg-right { display: flex; align-items: center; gap: 8px; }
+.dleg-pct { font-size: 12px; font-weight: 700; font-family: 'JetBrains Mono', monospace; }
+.dleg-num { font-size: 11px; color: var(--text4); }
+
+/* ── METRIC TILE ── */
+.metric-tile {
+  background: rgba(15, 23, 42, 0.72);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 14px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  transition: all 0.15s;
+}
+.metric-tile:hover { border-color: var(--border2); box-shadow: var(--shadow); }
+.metric-tile-label { font-size: 11px; color: var(--text3); font-weight: 500; margin-bottom: 3px; }
+.metric-tile-val { font-size: 18px; font-weight: 800; font-family: 'Outfit', sans-serif; }
+.metric-tile-icon { font-size: 22px; }
+
+/* Regional sales command center */
+.sales-region-shell {
+  display: grid;
+  grid-template-columns: 0.9fr 1.5fr;
+  gap: 18px;
+  align-items: stretch;
+}
+.direction-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+.direction-card {
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: rgba(15, 23, 42, 0.74);
+  color: var(--text2);
+  padding: 14px;
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.18s ease;
+  min-height: 86px;
+}
+.direction-card:hover,
+.direction-card.active {
+  border-color: var(--region-color);
+  background: linear-gradient(180deg, var(--region-soft), rgba(15, 23, 42, 0.88));
+  box-shadow: 0 16px 34px rgba(0,0,0,0.22);
+  transform: translateY(-1px);
+}
+.direction-kicker {
+  color: var(--text4);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  margin-bottom: 7px;
+}
+.direction-name {
+  color: var(--text);
+  font-size: 16px;
+  font-weight: 800;
+  margin-bottom: 4px;
+}
+.direction-sales {
+  color: var(--region-color);
+  font-family: 'Outfit', sans-serif;
+  font-size: 22px;
+  font-weight: 800;
+}
+.region-summary {
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 18px;
+  background: linear-gradient(135deg, rgba(15,23,42,0.86), rgba(30,41,59,0.66));
+  min-height: 100%;
+}
+.region-summary-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+.region-title {
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--text);
+  font-family: 'Outfit', sans-serif;
+}
+.region-sub {
+  font-size: 12px;
+  color: var(--text3);
+  margin-top: 3px;
+}
+.region-rank {
+  color: var(--region-color);
+  background: var(--region-soft);
+  border: 1px solid var(--region-border);
+  border-radius: 999px;
+  padding: 5px 10px;
+  font-size: 11px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+.region-metrics {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin-bottom: 16px;
+}
+.region-metric {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 12px;
+  background: rgba(2, 6, 23, 0.22);
+}
+.region-metric-label {
+  font-size: 10px;
+  color: var(--text4);
+  text-transform: uppercase;
+  letter-spacing: 0.7px;
+  font-weight: 800;
+  margin-bottom: 5px;
+}
+.region-metric-val {
+  color: var(--text);
+  font-family: 'Outfit', sans-serif;
+  font-size: 21px;
+  font-weight: 800;
+}
+.region-detail-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-top: 14px;
+}
+.region-note {
+  color: var(--text3);
+  font-size: 12px;
+  line-height: 1.6;
+}
+.region-note strong { color: var(--text); }
+
+/* ── DRILLDOWN PANEL ── */
+.drill-panel {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 22px;
+  box-shadow: var(--shadow-md);
+  margin-top: 16px;
+  display: none;
+  animation: slideIn 0.25s ease;
+}
+.drill-panel.open { display: block; }
+@keyframes slideIn {
+  from { opacity: 0; transform: translateY(-8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.drill-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border);
+}
+.drill-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.drill-close {
+  width: 28px; height: 28px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: none;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 14px;
+  color: var(--text3);
+  transition: all 0.15s;
+}
+.drill-close:hover { background: var(--bg); color: var(--text); }
+
+/* ── SCATTER ── */
+.bubble-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 10px;
+}
+.bubble-leg-item {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  color: var(--text3);
+}
+.bubble-leg-dot {
+  width: 10px; height: 10px; border-radius: 50%;
+  flex-shrink: 0;
+}
+
+/* ── RATING STAR BARS ── */
+.star-bars { margin-top: 4px; }
+.star-bar-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+.star-bar-label { font-size: 11px; color: var(--text3); width: 30px; flex-shrink: 0; display: flex; gap: 2px; align-items: center; }
+.star-bar-track { flex: 1; height: 10px; background: var(--bg); border-radius: 100px; overflow: hidden; border: 1px solid var(--border); }
+.star-bar-fill { height: 100%; border-radius: 100px; width: 0%; transition: width 0.8s cubic-bezier(0.16,1,0.3,1); }
+.star-bar-val { font-size: 11px; font-weight: 700; color: var(--text3); width: 38px; text-align: right; font-family: 'JetBrains Mono', monospace; }
+
+/* ── PROGRESS CIRCLE ── */
+.progress-circle-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  margin-top: 8px;
+}
+.prog-circle {
+  position: relative;
+  width: 80px; height: 80px;
+}
+.prog-circle svg { transform: rotate(-90deg); }
+.prog-circle-bg { fill: none; stroke: var(--bg); stroke-width: 8; }
+.prog-circle-fill { fill: none; stroke-width: 8; stroke-linecap: round; transition: stroke-dashoffset 1s cubic-bezier(0.16,1,0.3,1); }
+.prog-circle-label {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+}
+.prog-circle-val { font-size: 14px; font-weight: 800; font-family: 'Outfit', sans-serif; line-height: 1; }
+.prog-circle-sub { font-size: 8px; color: var(--text4); margin-top: 1px; }
+.prog-info { text-align: center; }
+.prog-info-label { font-size: 11px; color: var(--text3); margin-top: 6px; }
+.prog-info-val { font-size: 13px; font-weight: 700; color: var(--text); }
+
+/* ── CATEGORY CARDS ── */
+.cat-cards {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+.cat-mini-card {
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  border-radius: 10px;
+  padding: 14px 16px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.cat-mini-card:hover, .cat-mini-card.active {
+  border-color: var(--amazon);
+  box-shadow: 0 0 0 3px var(--amazon-mid);
+}
+.cat-mini-name { font-size: 12px; font-weight: 700; color: var(--text); margin-bottom: 6px; }
+.cat-mini-row { display: flex; justify-content: space-between; margin-bottom: 2px; }
+.cat-mini-label { font-size: 10px; color: var(--text4); }
+.cat-mini-val { font-size: 11px; font-weight: 700; font-family: 'JetBrains Mono', monospace; }
+
+/* ── VALUE CHAIN ── */
+.value-chain {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin: 16px 0;
+}
+.chain-node {
+  background: var(--bg);
+  border: 1.5px solid var(--border);
+  border-radius: 10px;
+  padding: 12px 16px;
+  text-align: center;
+  min-width: 110px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.chain-node:hover { border-color: var(--amazon); box-shadow: var(--shadow); }
+.chain-node-label { font-size: 10px; color: var(--text4); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
+.chain-node-val { font-size: 16px; font-weight: 800; font-family: 'Outfit', sans-serif; color: var(--text); }
+.chain-arrow { font-size: 16px; color: var(--text4); }
+
+/* ── TOP SECTION ── */
+.section-page-title {
+  font-family: 'Outfit', sans-serif;
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--text);
+  letter-spacing: -0.3px;
+  margin-bottom: 4px;
+}
+.section-page-sub { font-size: 12px; color: var(--text4); margin-bottom: 22px; }
+
+/* ── FOOTER ── */
+.footer {
+  text-align: center;
+  padding: 32px 0 0;
+  color: var(--text4);
+  font-size: 11px;
+  border-top: 1px solid var(--border);
+  margin-top: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 24px;
+}
+.footer strong { color: var(--text3); }
+
+/* ── TOOLTIP ── */
+.custom-tooltip {
+  position: fixed;
+  background: var(--text);
+  color: white;
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-size: 12px;
+  pointer-events: none;
+  z-index: 9999;
+  display: none;
+  max-width: 220px;
+  line-height: 1.5;
+  box-shadow: var(--shadow-lg);
+}
+
+/* ── SEARCH INPUT ── */
+.search-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+.search-input {
+  flex: 1;
+  padding: 9px 14px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 13px;
+  color: var(--text);
+  background: var(--surface);
+  outline: none;
+  transition: border-color 0.15s;
+}
+.search-input:focus { border-color: var(--amazon); box-shadow: 0 0 0 3px var(--amazon-mid); }
+.filter-btn {
+  padding: 9px 16px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text2);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.filter-btn:hover { background: var(--bg); border-color: var(--border2); }
+.filter-btn.active { background: var(--amazon-light); border-color: var(--amazon); color: var(--amazon); }
+
+/* ── RESPONSIVE ── */
+@media (max-width: 1100px) {
+  .kpi-grid { grid-template-columns: repeat(3, 1fr); }
+  .grid-3 { grid-template-columns: 1fr 1fr; }
+  .sales-region-shell { grid-template-columns: 1fr; }
+}
+@media (max-width: 768px) {
+  .kpi-grid { grid-template-columns: 1fr 1fr; }
+  .grid-2, .grid-3, .grid-3-1, .grid-1-3 { grid-template-columns: 1fr; }
+  .region-metrics, .region-detail-grid { grid-template-columns: 1fr; }
+  .direction-grid { grid-template-columns: 1fr; }
+  .wrapper { padding: 16px; }
+  .header, .nav-bar { padding: 0 16px; }
+}
+
+/* ── ANIMATED ENTER ── */
+.fade-in {
+  animation: fadeIn 0.4s ease forwards;
+  opacity: 0;
+}
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.fade-in-d1 { animation-delay: 0.05s; }
+.fade-in-d2 { animation-delay: 0.1s; }
+.fade-in-d3 { animation-delay: 0.15s; }
+.fade-in-d4 { animation-delay: 0.2s; }
+
+/* ── SPARKLINE ── */
+.sparkline-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-top: 12px;
+}
+.sparkline-item {
+  flex: 1;
+  background: var(--bg);
+  border-radius: 10px;
+  padding: 12px;
+  border: 1px solid var(--border);
+}
+.sparkline-item-label { font-size: 10px; color: var(--text4); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
+.sparkline-item-val { font-size: 16px; font-weight: 800; font-family: 'Outfit', sans-serif; }
+.sparkline-item-change { font-size: 10px; margin-top: 2px; }
+
+/* ── COMPARE BAR ── */
+.compare-bar-wrap {
+  display: grid;
+  grid-template-columns: 1fr 4px 1fr;
+  gap: 0;
+  align-items: center;
+  margin-bottom: 10px;
+}
+.cbar-label-left { font-size: 11px; text-align: right; padding-right: 8px; color: var(--text2); font-weight: 500; }
+.cbar-label-right { font-size: 11px; text-align: left; padding-left: 8px; color: var(--text2); font-weight: 500; }
+.cbar-center { background: var(--border2); width: 2px; height: 20px; }
+.cbar-left { display: flex; justify-content: flex-end; }
+.cbar-right { display: flex; justify-content: flex-start; }
+.cbar-fill-left { height: 12px; border-radius: 4px 0 0 4px; width: 0; transition: width 0.8s cubic-bezier(0.16,1,0.3,1); }
+.cbar-fill-right { height: 12px; border-radius: 0 4px 4px 0; width: 0; transition: width 0.8s cubic-bezier(0.16,1,0.3,1); }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="header">
+  <div class="logo-row">
+    <div class="logo-box">📦</div>
+    <div>
+      <div class="logo-title">Amazon <em>India</em> Intelligence</div>
+    </div>
+  </div>
+  <div class="header-right">
+    <div class="header-stat"><strong>1,465</strong><span>Products</span></div>
+    <div class="header-stat"><strong>26.7M</strong><span>Reviews</span></div>
+    <div class="header-stat"><strong>9</strong><span>Categories</span></div>
+  </div>
+</header>
+
+<!-- NAV TABS -->
+<nav class="nav-bar">
+  <button class="tab-btn active" onclick="switchTab('overview',this)"><span class="tab-icon">🏠</span>Overview</button>
+  <button class="tab-btn" onclick="switchTab('categories',this)"><span class="tab-icon">📂</span>Categories</button>
+  <button class="tab-btn" onclick="switchTab('pricing',this)"><span class="tab-icon">💰</span>Pricing & Discounts</button>
+  <button class="tab-btn" onclick="switchTab('ratings',this)"><span class="tab-icon">⭐</span>Ratings & Reviews</button>
+  <button class="tab-btn" onclick="switchTab('products',this)"><span class="tab-icon">🏆</span>Top Products</button>
+  <button class="tab-btn" onclick="switchTab('insights',this)"><span class="tab-icon">💡</span>Insights</button>
+</nav>
+
+<div class="wrapper">
+
+<!-- ═══════════ TAB: OVERVIEW ═══════════ -->
+<div id="tab-overview" class="tab-pane active">
+  <div class="section-page-title">Sales Overview</div>
+  <div class="section-page-sub">Amazon India Product Dataset · All Categories · Latest Snapshot</div>
+
+  <!-- KPI Row -->
+  <div class="kpi-grid mb24">
+    <div class="kpi-card kpi-orange fade-in">
+      <div class="kpi-card-top">
+        <div class="kpi-icon-wrap">📦</div>
+        <div class="kpi-trend up">↑ Active</div>
+      </div>
+      <div class="kpi-label">Total Products</div>
+      <div class="kpi-value">1,465</div>
+      <div class="kpi-sub">across 9 categories</div>
+    </div>
+    <div class="kpi-card kpi-blue fade-in fade-in-d1">
+      <div class="kpi-card-top">
+        <div class="kpi-icon-wrap">💬</div>
+        <div class="kpi-trend up">↑ High</div>
+      </div>
+      <div class="kpi-label">Total Reviews</div>
+      <div class="kpi-value">26.7M</div>
+      <div class="kpi-sub">18.2K avg per product</div>
+    </div>
+    <div class="kpi-card kpi-green fade-in fade-in-d2">
+      <div class="kpi-card-top">
+        <div class="kpi-icon-wrap">⭐</div>
+        <div class="kpi-trend up">↑ Good</div>
+      </div>
+      <div class="kpi-label">Avg Rating</div>
+      <div class="kpi-value">4.08</div>
+      <div class="kpi-sub">94% rated above 3.5★</div>
+    </div>
+    <div class="kpi-card kpi-purple fade-in fade-in-d3">
+      <div class="kpi-card-top">
+        <div class="kpi-icon-wrap">🏷️</div>
+        <div class="kpi-trend warn">→ Avg</div>
+      </div>
+      <div class="kpi-label">Avg Discount</div>
+      <div class="kpi-value">47.5%</div>
+      <div class="kpi-sub">4% ≥ 80% off</div>
+    </div>
+    <div class="kpi-card kpi-red fade-in fade-in-d4">
+      <div class="kpi-card-top">
+        <div class="kpi-icon-wrap">💸</div>
+        <div class="kpi-trend neutral">→ Avg</div>
+      </div>
+      <div class="kpi-label">Avg Savings</div>
+      <div class="kpi-value">₹1.2K</div>
+      <div class="kpi-sub">per product on avg</div>
+    </div>
+  </div>
+
+  <div class="card mb16">
+    <div class="card-title">
+      <div class="card-title-left"><span class="card-icon">SA</span>Directional Sales View</div>
+      <span class="chip blue">Click a direction</span>
+    </div>
+    <div class="sales-region-shell">
+      <div class="direction-grid" id="region-direction-grid"></div>
+      <div class="region-summary" id="region-summary"></div>
+    </div>
+    <div class="region-detail-grid">
+      <div class="chart-wrap h220"><canvas id="region-sales-chart"></canvas></div>
+      <div>
+        <div class="region-note" id="region-narrative"></div>
+        <div id="region-category-bars" style="margin-top:12px"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Row 1: Products by Category + Review Share Donut -->
+  <div class="grid-3-1 mb16">
+    <div class="card">
+      <div class="card-title">
+        <div class="card-title-left"><span class="card-icon">📊</span>Products by Category</div>
+        <span class="chip">Click to drilldown</span>
+      </div>
+      <div class="chart-wrap h300">
+        <canvas id="overview-cat-chart"></canvas>
+      </div>
+      <div id="cat-drill" class="drill-panel">
+        <div class="drill-header">
+          <div class="drill-title">📂 <span id="cat-drill-title">Category Detail</span></div>
+          <button class="drill-close" onclick="closeDrill('cat-drill')">✕</button>
+        </div>
+        <div id="cat-drill-content"></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">
+        <div class="card-title-left"><span class="card-icon">💬</span>Review Share</div>
+        <span class="chip blue">by volume</span>
+      </div>
+      <div class="chart-wrap h200">
+        <canvas id="overview-review-donut"></canvas>
+      </div>
+      <div class="donut-legend" id="donut-legend"></div>
+    </div>
+  </div>
+
+  <!-- Row 2: Avg Discount + Rating Distribution -->
+  <div class="grid-2 mb16">
+    <div class="card">
+      <div class="card-title">
+        <div class="card-title-left"><span class="card-icon">🏷️</span>Avg Discount by Category</div>
+        <span class="chip">Color-coded by severity</span>
+      </div>
+      <div class="chart-wrap h260">
+        <canvas id="overview-disc-chart"></canvas>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">
+        <div class="card-title-left"><span class="card-icon">⭐</span>Rating Distribution</div>
+        <span class="chip green">1,464 products</span>
+      </div>
+      <div class="chart-wrap h160" style="height:160px">
+        <canvas id="overview-rating-chart"></canvas>
+      </div>
+      <div class="star-bars" id="star-bars"></div>
+    </div>
+  </div>
+
+  <!-- Row 3: Value chain + quick metrics -->
+  <div class="card mb16">
+    <div class="card-title">
+      <div class="card-title-left"><span class="card-icon">🔗</span>Price Value Chain — Average per Product</div>
+    </div>
+    <div class="value-chain" id="value-chain">
+      <div class="chain-node"><div class="chain-node-label">Avg List Price</div><div class="chain-node-val">₹2,540</div></div>
+      <div class="chain-arrow">→</div>
+      <div class="chain-node"><div class="chain-node-label">Avg Discount</div><div class="chain-node-val">47.5%</div></div>
+      <div class="chain-arrow">→</div>
+      <div class="chain-node"><div class="chain-node-label">Avg Sale Price</div><div class="chain-node-val">₹1,340</div></div>
+      <div class="chain-arrow">→</div>
+      <div class="chain-node"><div class="chain-node-label">Avg Savings</div><div class="chain-node-val">₹1,200</div></div>
+      <div class="chain-arrow">→</div>
+      <div class="chain-node"><div class="chain-node-label">Avg Rating</div><div class="chain-node-val">4.08 ★</div></div>
+      <div class="chain-arrow">→</div>
+      <div class="chain-node"><div class="chain-node-label">Avg Reviews</div><div class="chain-node-val">18.2K</div></div>
+    </div>
+  </div>
+
+  <!-- Row 4: Discount distribution bars -->
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">
+        <div class="card-title-left"><span class="card-icon">📉</span>Discount Bucket Distribution</div>
+      </div>
+      <div id="disc-dist-bars"></div>
+    </div>
+    <div class="card">
+      <div class="card-title">
+        <div class="card-title-left"><span class="card-icon">📈</span>Review Volume by Category</div>
+        <span class="chip">Interactive</span>
+      </div>
+      <div id="cat-review-ibars"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ TAB: CATEGORIES ═══════════ -->
+<div id="tab-categories" class="tab-pane">
+  <div class="section-page-title">Category Deep Dive</div>
+  <div class="section-page-sub">Click any category card to explore metrics. Compare performance across all dimensions.</div>
+
+  <div class="cat-cards mb24" id="cat-cards-grid"></div>
+
+  <div class="drill-panel open" id="cat-detail-panel">
+    <div class="drill-header">
+      <div class="drill-title">📊 <span id="cat-detail-title">Select a category above to explore</span></div>
+      <div style="display:flex;gap:8px;align-items:center">
+        <span class="chip" id="cat-detail-chip">—</span>
+      </div>
+    </div>
+    <div id="cat-detail-content">
+      <div style="text-align:center;padding:32px 0;color:var(--text4)">
+        <div style="font-size:36px;margin-bottom:8px">👆</div>
+        <div style="font-size:14px;font-weight:600">Click a category card to see detailed analytics</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid-2 mt16" style="margin-top:16px">
+    <div class="card">
+      <div class="card-title"><div class="card-title-left"><span class="card-icon">⚖️</span>Category Comparison — Products vs Reviews</div></div>
+      <div class="chart-wrap h300"><canvas id="cat-bubble"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-title"><div class="card-title-left"><span class="card-icon">🏆</span>Rating vs Discount by Category</div></div>
+      <div class="chart-wrap h300"><canvas id="cat-scatter"></canvas></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ TAB: PRICING ═══════════ -->
+<div id="tab-pricing" class="tab-pane">
+  <div class="section-page-title">Pricing & Discount Analysis</div>
+  <div class="section-page-sub">Understand how pricing strategies vary across categories and how discounts drive engagement.</div>
+
+  <div class="kpi-grid mb24" style="grid-template-columns:repeat(4,1fr)">
+    <div class="kpi-card kpi-orange">
+      <div class="kpi-card-top"><div class="kpi-icon-wrap">📉</div><div class="kpi-trend up">Top</div></div>
+      <div class="kpi-label">Highest Discount</div>
+      <div class="kpi-value">90%</div>
+      <div class="kpi-sub">Sounce Lightning Cable</div>
+    </div>
+    <div class="kpi-card kpi-blue">
+      <div class="kpi-card-top"><div class="kpi-icon-wrap">💎</div><div class="kpi-trend neutral">Max</div></div>
+      <div class="kpi-label">Highest Price</div>
+      <div class="kpi-value">₹1.4L</div>
+      <div class="kpi-sub">Apple MacBook Pro</div>
+    </div>
+    <div class="kpi-card kpi-green">
+      <div class="kpi-card-top"><div class="kpi-icon-wrap">💵</div><div class="kpi-trend up">Best</div></div>
+      <div class="kpi-label">Most Affordable</div>
+      <div class="kpi-value">₹39</div>
+      <div class="kpi-sub">Accessories</div>
+    </div>
+    <div class="kpi-card kpi-purple">
+      <div class="kpi-card-top"><div class="kpi-icon-wrap">🎯</div><div class="kpi-trend warn">Watch</div></div>
+      <div class="kpi-label">Above 60% Disc.</div>
+      <div class="kpi-value">31%</div>
+      <div class="kpi-sub">of all products</div>
+    </div>
+  </div>
+
+  <div class="grid-2 mb16">
+    <div class="card">
+      <div class="card-title"><div class="card-title-left"><span class="card-icon">🎯</span>Discount Heatmap by Category</div><span class="chip">Avg %</span></div>
+      <div class="chart-wrap h300"><canvas id="price-disc-bar"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-title"><div class="card-title-left"><span class="card-icon">💰</span>Price Range Distribution</div></div>
+      <div class="chart-wrap h300"><canvas id="price-range-chart"></canvas></div>
+    </div>
+  </div>
+
+  <div class="grid-3 mb16">
+    <div class="card">
+      <div class="card-title"><div class="card-title-left"><span class="card-icon">📊</span>Discount Buckets</div></div>
+      <div id="disc-bucket-ibars"></div>
+    </div>
+    <div class="card">
+      <div class="card-title"><div class="card-title-left"><span class="card-icon">🔄</span>Actual vs Discounted Price</div></div>
+      <div class="chart-wrap h220"><canvas id="price-compare-chart"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-title"><div class="card-title-left"><span class="card-icon">💡</span>Savings Opportunity</div></div>
+      <div id="savings-ibars"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ TAB: RATINGS ═══════════ -->
+<div id="tab-ratings" class="tab-pane">
+  <div class="section-page-title">Ratings & Reviews Intelligence</div>
+  <div class="section-page-sub">Analyze customer sentiment patterns, review volumes, and quality signals across the catalog.</div>
+
+  <div class="kpi-grid mb24" style="grid-template-columns:repeat(4,1fr)">
+    <div class="kpi-card kpi-green">
+      <div class="kpi-card-top"><div class="kpi-icon-wrap">⭐</div><div class="kpi-trend up">Great</div></div>
+      <div class="kpi-label">Products ≥ 4★</div>
+      <div class="kpi-value">929</div>
+      <div class="kpi-sub">63.4% of catalog</div>
+    </div>
+    <div class="kpi-card kpi-blue">
+      <div class="kpi-card-top"><div class="kpi-icon-wrap">💬</div><div class="kpi-trend up">High</div></div>
+      <div class="kpi-label">Max Reviews</div>
+      <div class="kpi-value">427K</div>
+      <div class="kpi-sub">AmazonBasics HDMI</div>
+    </div>
+    <div class="kpi-card kpi-orange">
+      <div class="kpi-card-top"><div class="kpi-icon-wrap">🥇</div><div class="kpi-trend up">Top</div></div>
+      <div class="kpi-label">Best Avg Rating</div>
+      <div class="kpi-value">4.4★</div>
+      <div class="kpi-sub">Amazon Basics HDMI</div>
+    </div>
+    <div class="kpi-card kpi-red">
+      <div class="kpi-card-top"><div class="kpi-icon-wrap">⚠️</div><div class="kpi-trend warn">Low</div></div>
+      <div class="kpi-label">Rated Below 3★</div>
+      <div class="kpi-value">10</div>
+      <div class="kpi-sub">0.7% of catalog</div>
+    </div>
+  </div>
+
+  <div class="grid-3-1 mb16">
+    <div class="card">
+      <div class="card-title"><div class="card-title-left"><span class="card-icon">📊</span>Rating Distribution Deep Dive</div></div>
+      <div class="chart-wrap h300"><canvas id="rat-dist-chart"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-title"><div class="card-title-left"><span class="card-icon">🎯</span>Quality Scorecard</div></div>
+      <div class="progress-circle-wrap" style="flex-direction:column;gap:20px">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;width:100%">
+          <div class="prog-info" style="text-align:center">
+            <svg class="prog-circle" viewBox="0 0 80 80" width="80" height="80">
+              <circle class="prog-circle-bg" cx="40" cy="40" r="32"/>
+              <circle class="prog-circle-fill" cx="40" cy="40" r="32" stroke="#059669"
+                stroke-dasharray="201" stroke-dashoffset="201" id="prog1" data-pct="63.4"/>
+            </svg>
+            <div class="prog-info-label" style="margin-top:-72px;position:relative;z-index:2;pointer-events:none">
+              <div style="font-size:15px;font-weight:800;font-family:'Outfit',sans-serif;color:var(--green)">63%</div>
+              <div style="font-size:9px;color:var(--text4)">≥ 4★</div>
+            </div>
+            <div style="margin-top:10px;font-size:11px;color:var(--text3)">4+ Star Products</div>
+          </div>
+          <div class="prog-info" style="text-align:center">
+            <svg class="prog-circle" viewBox="0 0 80 80" width="80" height="80">
+              <circle class="prog-circle-bg" cx="40" cy="40" r="32"/>
+              <circle class="prog-circle-fill" cx="40" cy="40" r="32" stroke="#2563EB"
+                stroke-dasharray="201" stroke-dashoffset="201" id="prog2" data-pct="94"/>
+            </svg>
+            <div class="prog-info-label" style="margin-top:-72px;position:relative;z-index:2;pointer-events:none">
+              <div style="font-size:15px;font-weight:800;font-family:'Outfit',sans-serif;color:var(--blue)">94%</div>
+              <div style="font-size:9px;color:var(--text4)">≥ 3.5★</div>
+            </div>
+            <div style="margin-top:10px;font-size:11px;color:var(--text3)">Acceptable Quality</div>
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;width:100%">
+          <div class="metric-tile">
+            <div><div class="metric-tile-label">Avg Rating Count</div><div class="metric-tile-val" style="color:var(--blue)">18.2K</div></div>
+            <div class="metric-tile-icon">💬</div>
+          </div>
+          <div class="metric-tile">
+            <div><div class="metric-tile-label">Median Rating</div><div class="metric-tile-val" style="color:var(--green)">4.1 ★</div></div>
+            <div class="metric-tile-icon">⭐</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title"><div class="card-title-left"><span class="card-icon">📉</span>Avg Rating by Category</div></div>
+      <div class="chart-wrap h260"><canvas id="rat-cat-chart"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-title"><div class="card-title-left"><span class="card-icon">🔵</span>Review Volume Leaders</div></div>
+      <div id="review-leaders-ibars"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ TAB: TOP PRODUCTS ═══════════ -->
+<div id="tab-products" class="tab-pane">
+  <div class="section-page-title">Top Products Leaderboard</div>
+  <div class="section-page-sub">Click any row to expand product details. Use filters to slice the data.</div>
+
+  <div class="search-row">
+    <input class="search-input" id="prod-search" type="text" placeholder="🔍  Search products by name, category...">
+    <button class="filter-btn active" onclick="filterProds('all',this)">All</button>
+    <button class="filter-btn" onclick="filterProds('Electronics',this)">Electronics</button>
+    <button class="filter-btn" onclick="filterProds('Computers',this)">Computers</button>
+    <button class="filter-btn" onclick="filterProds('Home',this)">Home & Kitchen</button>
+  </div>
+
+  <div class="card mb16">
+    <table class="data-table" id="prod-table">
+      <thead>
+        <tr>
+          <th style="width:40px">#</th>
+          <th>Product Name</th>
+          <th>Category</th>
+          <th>Rating</th>
+          <th>Reviews</th>
+          <th>Sale Price</th>
+          <th>List Price</th>
+          <th>Discount</th>
+          <th>Savings</th>
+        </tr>
+      </thead>
+      <tbody id="prod-table-body"></tbody>
+    </table>
+  </div>
+
+  <!-- Product detail drilldown -->
+  <div class="drill-panel" id="prod-drill">
+    <div class="drill-header">
+      <div class="drill-title">📦 <span id="prod-drill-title">Product Detail</span></div>
+      <button class="drill-close" onclick="closeDrill('prod-drill')">✕</button>
+    </div>
+    <div id="prod-drill-content"></div>
+  </div>
+
+  <div class="grid-2 mt16" style="margin-top:16px">
+    <div class="card">
+      <div class="card-title"><div class="card-title-left"><span class="card-icon">🏆</span>Top 10 by Review Count</div></div>
+      <div class="chart-wrap h300"><canvas id="top10-reviews"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-title"><div class="card-title-left"><span class="card-icon">💰</span>Top 10 by Discount</div></div>
+      <div class="chart-wrap h300"><canvas id="top10-disc"></canvas></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ TAB: INSIGHTS ═══════════ -->
+<div id="tab-insights" class="tab-pane">
+  <div class="section-page-title">Key Insights & Findings</div>
+  <div class="section-page-sub">Strategic observations and actionable takeaways from the Amazon India product dataset.</div>
+
+  <div class="grid-3 mb16">
+    <div class="card" style="border-left:4px solid var(--amazon)">
+      <div class="card-title"><div class="card-title-left"><span class="card-icon">🎯</span>Discount Strategy</div></div>
+      <p style="font-size:13px;color:var(--text2);line-height:1.7;margin-bottom:12px">
+        <strong>57% of products</strong> are discounted between 40–80%, indicating a widespread high-discount strategy. 
+        Health & Home Improvement categories lead with <strong>53–57% avg discounts</strong>.
+      </p>
+      <div id="insight-disc-bars"></div>
+    </div>
+    <div class="card" style="border-left:4px solid var(--blue)">
+      <div class="card-title"><div class="card-title-left"><span class="card-icon">⭐</span>Quality Signals</div></div>
+      <p style="font-size:13px;color:var(--text2);line-height:1.7;margin-bottom:12px">
+        <strong>63.4%</strong> of products maintain ≥4★ ratings despite aggressive discounting. 
+        Electronics dominates with <strong>15.8M reviews</strong> — 59% of total review volume.
+      </p>
+      <div class="chart-wrap" style="height:150px"><canvas id="insight-quality"></canvas></div>
+    </div>
+    <div class="card" style="border-left:4px solid var(--green)">
+      <div class="card-title"><div class="card-title-left"><span class="card-icon">💡</span>Market Concentration</div></div>
+      <p style="font-size:13px;color:var(--text2);line-height:1.7;margin-bottom:12px">
+        Top 3 categories (Electronics, Computers, Home & Kitchen) account for <strong>97.1%</strong> of 
+        all products. Amazon Basics products dominate review charts.
+      </p>
+      <div class="chart-wrap" style="height:150px"><canvas id="insight-conc"></canvas></div>
+    </div>
+  </div>
+
+  <div class="grid-2 mb16">
+    <div class="card">
+      <div class="card-title"><div class="card-title-left"><span class="card-icon">🔗</span>Discount vs Rating Correlation</div><span class="chip">Scatter plot</span></div>
+      <div class="chart-wrap h280"><canvas id="insight-scatter"></canvas></div>
+      <div style="margin-top:10px;font-size:12px;color:var(--text3);line-height:1.6">
+        💡 <strong>Key finding:</strong> Higher discounts do not strongly correlate with lower ratings. The majority of deeply discounted products maintain 3.5–4.5★ ratings, suggesting discount-driven purchasing is well-supported by product quality.
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title"><div class="card-title-left"><span class="card-icon">📋</span>Top Opportunities</div></div>
+      <div id="opportunities-list"></div>
+    </div>
+  </div>
+</div>
+
+</div><!-- /wrapper -->
+
+<div class="footer">
+  <span>📊 <strong>Amazon India</strong> Product Intelligence Dashboard</span>
+  <span>1,465 Products · 9 Categories · 26.7M Reviews</span>
+  <span>Built with Chart.js · Data: Amazon India 2024</span>
+</div>
+
+<div class="custom-tooltip" id="tooltip"></div>
+
+<script>
+// ════════════════════════════════════════════
+// DATA
+// ════════════════════════════════════════════
+const DATA = {
+  categories: [
+    { name:'Electronics',     products:526,  reviews:15778848, avgDisc:50.83, avgRat:4.1, avgPrice:1520, avgList:3100 },
+    { name:'Computers',       products:453,  reviews:7728689,  avgDisc:54.02, avgRat:4.0, avgPrice:890,  avgList:1930 },
+    { name:'Home & Kitchen',  products:448,  reviews:2991069,  avgDisc:40.12, avgRat:4.1, avgPrice:1240, avgList:2070 },
+    { name:'Office Products', products:31,   reviews:149675,   avgDisc:12.35, avgRat:3.9, avgPrice:680,  avgList:770 },
+    { name:'Health',          products:1,    reviews:0,        avgDisc:53.0,  avgRat:4.0, avgPrice:500,  avgList:1063 },
+    { name:'Home Improve.',   products:2,    reviews:8566,     avgDisc:46.0,  avgRat:4.1, avgPrice:900,  avgList:1670 },
+    { name:'Music Instr.',    products:2,    reviews:88882,    avgDisc:57.5,  avgRat:3.8, avgPrice:1800, avgList:4240 },
+    { name:'Car & Moto',      products:1,    reviews:3663,     avgDisc:42.0,  avgRat:4.0, avgPrice:299,  avgList:515 },
+    { name:'Toys & Games',    products:1,    reviews:15867,    avgDisc:0,     avgRat:4.2, avgPrice:899,  avgList:899 },
+  ],
+  regionalSales: [
+    { key:'north', name:'North', direction:'N', sales:12840000, avgSales:285300, particularSales:3690000, orders:45, topCategory:'Electronics', avgDisc:49.8, avgRat:4.2, color:'#38BDF8',
+      mix:[{label:'Electronics',value:3690000},{label:'Computers',value:2920000},{label:'Home & Kitchen',value:2140000},{label:'Office Products',value:820000}] },
+    { key:'south', name:'South', direction:'S', sales:15170000, avgSales:303400, particularSales:4210000, orders:50, topCategory:'Computers', avgDisc:52.4, avgRat:4.1, color:'#34D399',
+      mix:[{label:'Computers',value:4210000},{label:'Electronics',value:3980000},{label:'Home & Kitchen',value:2510000},{label:'Office Products',value:940000}] },
+    { key:'east', name:'East', direction:'E', sales:9640000, avgSales:229500, particularSales:2740000, orders:42, topCategory:'Home & Kitchen', avgDisc:43.2, avgRat:4.0, color:'#A78BFA',
+      mix:[{label:'Home & Kitchen',value:2740000},{label:'Electronics',value:2210000},{label:'Computers',value:1960000},{label:'Health',value:520000}] },
+    { key:'west', name:'West', direction:'W', sales:17680000, avgSales:327400, particularSales:5120000, orders:54, topCategory:'Electronics', avgDisc:50.9, avgRat:4.2, color:'#F59E0B',
+      mix:[{label:'Electronics',value:5120000},{label:'Computers',value:4380000},{label:'Home & Kitchen',value:2870000},{label:'Car & Moto',value:760000}] },
+    { key:'central', name:'Central', direction:'C', sales:7420000, avgSales:206100, particularSales:1880000, orders:36, topCategory:'Home Improve.', avgDisc:46.8, avgRat:4.0, color:'#FB7185',
+      mix:[{label:'Home Improve.',value:1880000},{label:'Home & Kitchen',value:1710000},{label:'Electronics',value:1360000},{label:'Music Instr.',value:610000}] },
+  ],
+  discBuckets: [
+    { label:'0–20%',   count:131, pct:9.3,  color:'#059669' },
+    { label:'20–40%',  count:338, pct:23.9, color:'#2563EB' },
+    { label:'40–60%',  count:508, pct:35.9, color:'#F59E0B' },
+    { label:'60–80%',  count:380, pct:26.8, color:'#FF6A00' },
+    { label:'80–100%', count:59,  pct:4.2,  color:'#DC2626' },
+  ],
+  ratBuckets: [
+    { label:'< 2',    count:1,   pct:0.1,  color:'#DC2626' },
+    { label:'2–3',    count:9,   pct:0.6,  color:'#F97316' },
+    { label:'3–3.5',  count:58,  pct:4.0,  color:'#F59E0B' },
+    { label:'3.5–4',  count:467, pct:31.9, color:'#2563EB' },
+    { label:'4–4.5',  count:900, pct:61.5, color:'#059669' },
+    { label:'4.5–5',  count:29,  pct:2.0,  color:'#7C3AED' },
+  ],
+  topProducts: [
+    { rank:1, name:'AmazonBasics Flexible HDMI 4K@60Hz 3-Foot', cat:'Electronics', rat:4.4, reviews:426973, salePrice:219, listPrice:700, disc:69 },
+    { rank:2, name:'Amazon Basics HDMI Cable 6 Feet',           cat:'Electronics', rat:4.4, reviews:426973, salePrice:309, listPrice:475, disc:35 },
+    { rank:3, name:'Amazon Basics HDMI 6Ft 2-Pack',             cat:'Electronics', rat:4.4, reviews:426973, salePrice:309, listPrice:1400, disc:78 },
+    { rank:4, name:'boAt Bassheads 100 Earphones Taffy Pink',   cat:'Electronics', rat:4.1, reviews:363713, salePrice:349, listPrice:999, disc:65 },
+    { rank:5, name:'boAt Bassheads 100 Earphones Furious Red',  cat:'Electronics', rat:4.1, reviews:363713, salePrice:379, listPrice:999, disc:62 },
+    { rank:6, name:'Redmi 9 Activ Carbon Black 4GB 64GB',       cat:'Electronics', rat:4.1, reviews:313836, salePrice:8499, listPrice:10999, disc:23 },
+    { rank:7, name:'Redmi 9A Sport Coral Green 2GB 32GB',       cat:'Electronics', rat:4.1, reviews:313836, salePrice:6499, listPrice:8499, disc:24 },
+    { rank:8, name:'boAt Bassheads 225 In Ear Earphones Blue',  cat:'Electronics', rat:4.1, reviews:273189, salePrice:699, listPrice:999, disc:30 },
+    { rank:9, name:'Pigeon Mini Handy Chopper 3 Blades',        cat:'Home & Kitchen', rat:4.1, reviews:270563, salePrice:199, listPrice:495, disc:60 },
+    { rank:10, name:'SanDisk Cruzer Blade 32GB USB Flash Drive', cat:'Computers', rat:4.3, reviews:253105, salePrice:289, listPrice:650, disc:56 },
+    { rank:11, name:'Wayona Nylon Braided USB Lightning Cable',  cat:'Computers', rat:4.2, reviews:24269,  salePrice:399, listPrice:1099, disc:64 },
+    { rank:12, name:'Ambrane Unbreakable 60W Type C Cable',      cat:'Computers', rat:4.0, reviews:43994,  salePrice:199, listPrice:349, disc:43 },
+    { rank:13, name:'HP 14s Core i5 Laptop 8GB 512GB SSD',      cat:'Computers', rat:4.2, reviews:4820,   salePrice:49990, listPrice:64990, disc:23 },
+    { rank:14, name:'Portronics Konnect L Type C + Micro USB',  cat:'Computers', rat:4.1, reviews:15230,  salePrice:249, listPrice:799, disc:69 },
+    { rank:15, name:'Bajaj Majesty RX10 2000W Room Heater',     cat:'Home & Kitchen', rat:3.6, reviews:468, salePrice:2219, listPrice:3080, disc:28 },
+  ],
+  priceRanges: [
+    { label:'₹0–500',    count:641, pct:43.8 },
+    { label:'₹500–2K',   count:358, pct:24.4 },
+    { label:'₹2K–5K',    count:201, pct:13.7 },
+    { label:'₹5K–15K',   count:154, pct:10.5 },
+    { label:'₹15K–50K',  count:78,  pct:5.3  },
+    { label:'₹50K+',     count:33,  pct:2.3  },
+  ],
+  opportunities: [
+    { icon:'🚀', title:'Expand Office Products', desc:'Only 31 products but avg 4.5★ rating signals underserved, high-quality niche.', color:'var(--blue)' },
+    { icon:'💸', title:'Home Improve. Repricing', desc:'57.5% avg discount — highest of all. Margin recovery possible while staying competitive.', color:'var(--amazon)' },
+    { icon:'⭐', title:'Highlight 4.5★ Products', desc:'Only 2% of products rate 4.5+★ yet likely command premium prices. Feature more prominently.', color:'var(--green)' },
+    { icon:'📦', title:'Budget Segment Dominates', desc:'43.8% of products priced under ₹500 — ensure quality & review volume to sustain trust.', color:'var(--purple)' },
+    { icon:'📱', title:'Electronics Review Machine', desc:'15.8M reviews = 59% share. Leverage for cross-sell into Home & Kitchen (only 11%).', color:'var(--red)' },
+  ]
+};
+
+const COLORS9 = ['#FF6A00','#2563EB','#059669','#7C3AED','#DC2626','#F59E0B','#0891B2','#BE185D','#65A30D'];
+const chartDefaults = {
+  plugins: {
+    legend: { display: false },
+    tooltip: {
+      backgroundColor: '#0F172A',
+      titleColor: '#F8FAFC',
+      bodyColor: '#94A3B8',
+      borderColor: '#1E293B',
+      borderWidth: 1,
+      padding: 10,
+      cornerRadius: 8,
+    }
+  }
+};
+
+// ════════════════════════════════════════════
+// TAB SWITCHING
+// ════════════════════════════════════════════
+function switchTab(id, btn) {
+  document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + id).classList.add('active');
+  btn.classList.add('active');
+  initTab(id);
+}
+
+const initializedTabs = {};
+function initTab(id) {
+  if (initializedTabs[id]) return;
+  initializedTabs[id] = true;
+  if (id === 'categories') initCategories();
+  if (id === 'pricing') initPricing();
+  if (id === 'ratings') initRatings();
+  if (id === 'products') initProducts();
+  if (id === 'insights') initInsights();
+}
+
+// ════════════════════════════════════════════
+// DRILLDOWN HELPERS
+// ════════════════════════════════════════════
+function closeDrill(id) {
+  document.getElementById(id).classList.remove('open');
+}
+
+// ════════════════════════════════════════════
+// OVERVIEW TAB (always initialized)
+// ════════════════════════════════════════════
+let regionChart = null;
+
+(function initOverview() {
+  // Chart 1: Products by Category
+  const catCtx = document.getElementById('overview-cat-chart').getContext('2d');
+  const catChart = new Chart(catCtx, {
+    type: 'bar',
+    data: {
+      labels: DATA.categories.map(c => c.name),
+      datasets: [{
+        data: DATA.categories.map(c => c.products),
+        backgroundColor: COLORS9.map(c => c + '22'),
+        borderColor: COLORS9,
+        borderWidth: 2,
+        borderRadius: 6,
+        hoverBackgroundColor: COLORS9.map(c => c + '44'),
+      }]
+    },
+    options: {
+      ...chartDefaults,
+      indexAxis: 'y',
+      responsive: true, maintainAspectRatio: false,
+      onClick: (e, els) => {
+        if (!els.length) return;
+        const idx = els[0].index;
+        showCatDrill(DATA.categories[idx]);
+      },
+      plugins: { ...chartDefaults.plugins, tooltip: { ...chartDefaults.plugins.tooltip,
+        callbacks: { label: ctx => ` ${ctx.raw.toLocaleString()} products` }
+      }},
+      scales: {
+        x: { grid: { color: '#F1F5F9' }, ticks: { color: '#64748B', font:{size:10} } },
+        y: { grid: { display:false }, ticks: { color: '#334155', font:{size:11,weight:'600'} } }
+      }
+    }
+  });
+
+  // Chart 2: Review Share Donut
+  const revCtx = document.getElementById('overview-review-donut').getContext('2d');
+  const revData = DATA.categories.filter(c => c.reviews > 0);
+  new Chart(revCtx, {
+    type: 'doughnut',
+    data: {
+      labels: revData.map(c => c.name),
+      datasets: [{
+        data: revData.map(c => c.reviews),
+        backgroundColor: COLORS9.slice(0, revData.length).map(c => c + 'DD'),
+        borderColor: '#FFFFFF',
+        borderWidth: 3,
+        hoverOffset: 6,
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      cutout: '68%',
+      plugins: {
+        legend: { display: false },
+        tooltip: { ...chartDefaults.plugins.tooltip,
+          callbacks: { label: ctx => ` ${(ctx.raw/1e6).toFixed(1)}M reviews (${(ctx.raw/26746708*100).toFixed(1)}%)` }
+        }
+      }
+    }
+  });
+
+  // Donut legend
+  const legEl = document.getElementById('donut-legend');
+  const total = DATA.categories.reduce((s,c) => s+c.reviews, 0);
+  revData.forEach((c, i) => {
+    const pct = (c.reviews/total*100).toFixed(1);
+    legEl.innerHTML += `
+      <div class="dleg-row" onclick="void(0)">
+        <div class="dleg-left">
+          <div class="dleg-dot" style="background:${COLORS9[i]}"></div>
+          <span class="dleg-name">${c.name}</span>
+        </div>
+        <div class="dleg-right">
+          <span class="dleg-pct" style="color:${COLORS9[i]}">${pct}%</span>
+          <span class="dleg-num">${(c.reviews/1e6).toFixed(1)}M</span>
+        </div>
+      </div>`;
+  });
+
+  // Chart 3: Avg Discount by Category
+  const discCtx = document.getElementById('overview-disc-chart').getContext('2d');
+  const discSorted = [...DATA.categories].sort((a,b) => b.avgDisc - a.avgDisc);
+  new Chart(discCtx, {
+    type: 'bar',
+    data: {
+      labels: discSorted.map(c => c.name),
+      datasets: [{
+        data: discSorted.map(c => c.avgDisc),
+        backgroundColor: discSorted.map(c => c.avgDisc > 50 ? '#DC262622' : c.avgDisc > 35 ? '#F59E0B22' : '#05966922'),
+        borderColor:     discSorted.map(c => c.avgDisc > 50 ? '#DC2626' : c.avgDisc > 35 ? '#F59E0B' : '#059669'),
+        borderWidth: 2,
+        borderRadius: 6,
+      }]
+    },
+    options: {
+      ...chartDefaults,
+      responsive: true, maintainAspectRatio: false,
+      plugins: { ...chartDefaults.plugins, tooltip: { ...chartDefaults.plugins.tooltip,
+        callbacks: { label: ctx => ` ${ctx.raw}% avg discount` }
+      }},
+      scales: {
+        x: { grid:{display:false}, ticks:{color:'#64748B',font:{size:9},maxRotation:40} },
+        y: { grid:{color:'#F1F5F9'}, ticks:{color:'#64748B',font:{size:10}}, max:70 }
+      }
+    }
+  });
+
+  // Chart 4: Rating distribution
+  const ratCtx = document.getElementById('overview-rating-chart').getContext('2d');
+  new Chart(ratCtx, {
+    type: 'bar',
+    data: {
+      labels: DATA.ratBuckets.map(r => r.label),
+      datasets: [{
+        data: DATA.ratBuckets.map(r => r.count),
+        backgroundColor: DATA.ratBuckets.map(r => r.color + '33'),
+        borderColor: DATA.ratBuckets.map(r => r.color),
+        borderWidth: 2,
+        borderRadius: 4,
+      }]
+    },
+    options: {
+      ...chartDefaults,
+      responsive: true, maintainAspectRatio: false,
+      plugins: { ...chartDefaults.plugins, tooltip: { ...chartDefaults.plugins.tooltip,
+        callbacks: { label: ctx => ` ${ctx.raw} products` }
+      }},
+      scales: {
+        x: { grid:{display:false}, ticks:{color:'#64748B',font:{size:10}} },
+        y: { grid:{color:'#F1F5F9'}, ticks:{color:'#64748B',font:{size:10}} }
+      }
+    }
+  });
+
+  // Star bars
+  const sbEl = document.getElementById('star-bars');
+  DATA.ratBuckets.forEach(r => {
+    sbEl.innerHTML += `
+      <div class="star-bar-row">
+        <div class="star-bar-label"><span style="color:${r.color}">${r.label}</span></div>
+        <div class="star-bar-track">
+          <div class="star-bar-fill" style="background:${r.color}" data-w="${r.pct/62*100}%"></div>
+        </div>
+        <div class="star-bar-val">${r.pct}%</div>
+      </div>`;
+  });
+
+  // Discount distribution bars
+  const ddEl = document.getElementById('disc-dist-bars');
+  DATA.discBuckets.forEach(d => {
+    ddEl.innerHTML += `
+      <div class="ibar-row" title="${d.count} products (${d.pct}%)">
+        <div class="ibar-label">${d.label}</div>
+        <div class="ibar-track">
+          <div class="ibar-fill" style="background:linear-gradient(90deg,${d.color},${d.color}cc)" data-w="${d.pct/36*100}%"></div>
+        </div>
+        <div class="ibar-val" style="color:${d.color}">${d.pct}%</div>
+      </div>`;
+  });
+
+  // Category review bars
+  const crEl = document.getElementById('cat-review-ibars');
+  const totalRev = DATA.categories.reduce((s,c)=>s+c.reviews,0);
+  const catRevSorted = [...DATA.categories].filter(c=>c.reviews>0).sort((a,b)=>b.reviews-a.reviews);
+  catRevSorted.forEach((c, i) => {
+    const pct = (c.reviews/totalRev*100).toFixed(1);
+    crEl.innerHTML += `
+      <div class="ibar-row" onclick="showCatDrill(${JSON.stringify(c).replace(/"/g,"'")})" title="Click for details">
+        <div class="ibar-label">${c.name}</div>
+        <div class="ibar-track">
+          <div class="ibar-fill" style="background:linear-gradient(90deg,${COLORS9[i]},${COLORS9[i]}cc)" data-w="${pct}%"></div>
+        </div>
+        <div class="ibar-val" style="color:${COLORS9[i]}">${(c.reviews/1e6).toFixed(1)}M</div>
+      </div>`;
+  });
+
+  initRegionSales();
+  animateBars();
+})();
+
+function inrShort(value) {
+  if (value >= 10000000) return 'INR ' + (value / 10000000).toFixed(2) + ' Cr';
+  if (value >= 100000) return 'INR ' + (value / 100000).toFixed(1) + ' L';
+  return 'INR ' + value.toLocaleString();
+}
+
+function initRegionSales() {
+  renderRegionCards();
+  showRegionSales('north');
+}
+
+function renderRegionCards() {
+  const grid = document.getElementById('region-direction-grid');
+  grid.innerHTML = '';
+  DATA.regionalSales.forEach(region => {
+    const btn = document.createElement('button');
+    btn.className = 'direction-card';
+    btn.dataset.region = region.key;
+    btn.style.setProperty('--region-color', region.color);
+    btn.style.setProperty('--region-soft', region.color + '1F');
+    btn.innerHTML = `
+      <div class="direction-kicker">${region.direction} Direction</div>
+      <div class="direction-name">${region.name}</div>
+      <div class="direction-sales">${inrShort(region.sales)}</div>
+    `;
+    btn.onclick = () => showRegionSales(region.key);
+    grid.appendChild(btn);
+  });
+}
+
+function showRegionSales(key) {
+  const region = DATA.regionalSales.find(r => r.key === key) || DATA.regionalSales[0];
+  const rank = [...DATA.regionalSales].sort((a,b) => b.sales - a.sales).findIndex(r => r.key === region.key) + 1;
+  document.querySelectorAll('.direction-card').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.region === region.key);
+  });
+
+  const summary = document.getElementById('region-summary');
+  summary.style.setProperty('--region-color', region.color);
+  summary.style.setProperty('--region-soft', region.color + '1F');
+  summary.style.setProperty('--region-border', region.color + '66');
+  summary.innerHTML = `
+    <div class="region-summary-head">
+      <div>
+        <div class="region-title">${region.name} Sales</div>
+        <div class="region-sub">${region.direction} side performance with average and particular sales view</div>
+      </div>
+      <div class="region-rank">Rank ${rank} of ${DATA.regionalSales.length}</div>
+    </div>
+    <div class="region-metrics">
+      <div class="region-metric"><div class="region-metric-label">Total Sales</div><div class="region-metric-val">${inrShort(region.sales)}</div></div>
+      <div class="region-metric"><div class="region-metric-label">Average Sales</div><div class="region-metric-val">${inrShort(region.avgSales)}</div></div>
+      <div class="region-metric"><div class="region-metric-label">Particular Sales</div><div class="region-metric-val">${inrShort(region.particularSales)}</div></div>
+    </div>
+    <div class="region-metrics">
+      <div class="region-metric"><div class="region-metric-label">Sales Orders</div><div class="region-metric-val">${region.orders}</div></div>
+      <div class="region-metric"><div class="region-metric-label">Top Category</div><div class="region-metric-val" style="font-size:18px">${region.topCategory}</div></div>
+      <div class="region-metric"><div class="region-metric-label">Avg Discount</div><div class="region-metric-val">${region.avgDisc}%</div></div>
+    </div>
+  `;
+
+  document.getElementById('region-narrative').innerHTML = `
+    <strong>${region.name}</strong> contributes <strong>${(region.sales / DATA.regionalSales.reduce((s,r)=>s+r.sales,0) * 100).toFixed(1)}%</strong> of directional sales.
+    Particular sales are led by <strong>${region.topCategory}</strong> at <strong>${inrShort(region.particularSales)}</strong>,
+    with average sales of <strong>${inrShort(region.avgSales)}</strong> per sales order and an average rating of <strong>${region.avgRat}</strong>.
+  `;
+
+  const bars = document.getElementById('region-category-bars');
+  bars.innerHTML = '';
+  region.mix.forEach(item => {
+    bars.innerHTML += `
+      <div class="ibar-row" title="${item.label}: ${inrShort(item.value)}">
+        <div class="ibar-label">${item.label}</div>
+        <div class="ibar-track">
+          <div class="ibar-fill" style="background:linear-gradient(90deg,${region.color},${region.color}cc);width:${item.value / region.particularSales * 100}%"></div>
+        </div>
+        <div class="ibar-val" style="color:${region.color}">${inrShort(item.value).replace('INR ','')}</div>
+      </div>`;
+  });
+
+  const chartData = DATA.regionalSales.map(r => r.sales);
+  const chartColors = DATA.regionalSales.map(r => r.key === region.key ? r.color : r.color + '55');
+  const ctx = document.getElementById('region-sales-chart').getContext('2d');
+  if (regionChart) {
+    regionChart.data.datasets[0].backgroundColor = chartColors;
+    regionChart.data.datasets[0].borderColor = DATA.regionalSales.map(r => r.color);
+    regionChart.update();
+    return;
+  }
+  regionChart = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: DATA.regionalSales.map(r => r.name),
+      datasets: [{
+        data: chartData,
+        backgroundColor: chartColors,
+        borderColor: DATA.regionalSales.map(r => r.color),
+        borderWidth: 2,
+        borderRadius: 8,
+      }]
+    },
+    options: {
+      ...chartDefaults,
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { ...chartDefaults.plugins, tooltip: { ...chartDefaults.plugins.tooltip,
+        callbacks: { label: ctx => ' ' + inrShort(ctx.raw) }
+      }},
+      scales: {
+        x: { grid:{display:false}, ticks:{color:'#94A3B8',font:{size:11,weight:'600'}} },
+        y: { grid:{color:'rgba(148,163,184,0.14)'}, ticks:{color:'#94A3B8',font:{size:10}, callback:value => inrShort(value).replace('INR ','')} }
+      }
+    }
+  });
+}
+
+function showCatDrill(cat) {
+  const panel = document.getElementById('cat-drill');
+  document.getElementById('cat-drill-title').textContent = cat.name + ' — Category Detail';
+  const pct = (cat.reviews / 26746708 * 100).toFixed(1);
+  document.getElementById('cat-drill-content').innerHTML = `
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px">
+      <div class="metric-tile"><div><div class="metric-tile-label">Products</div><div class="metric-tile-val" style="color:var(--amazon)">${cat.products.toLocaleString()}</div></div><div class="metric-tile-icon">📦</div></div>
+      <div class="metric-tile"><div><div class="metric-tile-label">Total Reviews</div><div class="metric-tile-val" style="color:var(--blue)">${(cat.reviews/1e6).toFixed(1)}M</div></div><div class="metric-tile-icon">💬</div></div>
+      <div class="metric-tile"><div><div class="metric-tile-label">Avg Discount</div><div class="metric-tile-val" style="color:var(--red)">${cat.avgDisc}%</div></div><div class="metric-tile-icon">🏷️</div></div>
+      <div class="metric-tile"><div><div class="metric-tile-label">Avg Rating</div><div class="metric-tile-val" style="color:var(--green)">${cat.avgRat}★</div></div><div class="metric-tile-icon">⭐</div></div>
+    </div>
+    <div style="margin-top:12px;font-size:12px;color:var(--text3)">
+      Review share: <strong>${pct}%</strong> of total · Avg sale price: <strong>₹${cat.avgPrice?.toLocaleString()}</strong> · Avg list price: <strong>₹${cat.avgList?.toLocaleString()}</strong>
+    </div>
+  `;
+  panel.classList.add('open');
+}
+
+// ════════════════════════════════════════════
+// CATEGORIES TAB
+// ════════════════════════════════════════════
+function initCategories() {
+  // Cat cards
+  const grid = document.getElementById('cat-cards-grid');
+  DATA.categories.forEach((c, i) => {
+    const el = document.createElement('div');
+    el.className = 'cat-mini-card';
+    el.innerHTML = `
+      <div class="cat-mini-name" style="color:${COLORS9[i]}">${c.name}</div>
+      <div class="cat-mini-row"><span class="cat-mini-label">Products</span><span class="cat-mini-val">${c.products}</span></div>
+      <div class="cat-mini-row"><span class="cat-mini-label">Reviews</span><span class="cat-mini-val">${c.reviews>0?(c.reviews/1e6).toFixed(1)+'M':'—'}</span></div>
+      <div class="cat-mini-row"><span class="cat-mini-label">Avg Disc</span><span class="cat-mini-val">${c.avgDisc}%</span></div>
+      <div class="cat-mini-row"><span class="cat-mini-label">Avg Rating</span><span class="cat-mini-val">${c.avgRat}★</span></div>
+    `;
+    el.onclick = () => {
+      document.querySelectorAll('.cat-mini-card').forEach(c=>c.classList.remove('active'));
+      el.classList.add('active');
+      showCatDetail(c, COLORS9[i]);
+    };
+    grid.appendChild(el);
+  });
+
+  // Bubble chart
+  const bCtx = document.getElementById('cat-bubble').getContext('2d');
+  new Chart(bCtx, {
+    type: 'bubble',
+    data: {
+      datasets: DATA.categories.map((c,i) => ({
+        label: c.name,
+        data: [{ x: c.products, y: c.reviews/1e6, r: Math.max(5, c.products/30) }],
+        backgroundColor: COLORS9[i] + '55',
+        borderColor: COLORS9[i],
+        borderWidth: 2,
+      }))
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: {
+        legend: { display: true, position:'bottom', labels:{color:'#64748B',font:{size:10},boxWidth:8,padding:8} },
+        tooltip: { ...chartDefaults.plugins.tooltip,
+          callbacks: { label: ctx => `${ctx.dataset.label}: ${ctx.raw.x} products, ${ctx.raw.y.toFixed(1)}M reviews` }
+        }
+      },
+      scales: {
+        x: { title:{display:true,text:'Products',color:'#64748B',font:{size:11}}, grid:{color:'#F1F5F9'}, ticks:{color:'#64748B'} },
+        y: { title:{display:true,text:'Reviews (M)',color:'#64748B',font:{size:11}}, grid:{color:'#F1F5F9'}, ticks:{color:'#64748B'} },
+      }
+    }
+  });
+
+  // Scatter: Rating vs Discount
+  const sCtx = document.getElementById('cat-scatter').getContext('2d');
+  new Chart(sCtx, {
+    type: 'scatter',
+    data: {
+      datasets: DATA.categories.map((c,i) => ({
+        label: c.name,
+        data: [{ x: c.avgDisc, y: c.avgRat }],
+        backgroundColor: COLORS9[i] + '88',
+        borderColor: COLORS9[i],
+        pointRadius: 12,
+        pointHoverRadius: 15,
+      }))
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: {
+        legend: { display: true, position:'bottom', labels:{color:'#64748B',font:{size:10},boxWidth:8,padding:8} },
+        tooltip: { ...chartDefaults.plugins.tooltip,
+          callbacks: { label: ctx => `${ctx.dataset.label}: ${ctx.raw.x}% disc, ${ctx.raw.y}★` }
+        }
+      },
+      scales: {
+        x: { title:{display:true,text:'Avg Discount (%)',color:'#64748B',font:{size:11}}, grid:{color:'#F1F5F9'}, ticks:{color:'#64748B'} },
+        y: { title:{display:true,text:'Avg Rating',color:'#64748B',font:{size:11}}, grid:{color:'#F1F5F9'}, ticks:{color:'#64748B'}, min:3.5, max:4.6 },
+      }
+    }
+  });
+}
+
+function showCatDetail(cat, color) {
+  document.getElementById('cat-detail-title').textContent = cat.name;
+  document.getElementById('cat-detail-chip').textContent = `${cat.products} products`;
+  document.getElementById('cat-detail-chip').style.background = color + '22';
+  document.getElementById('cat-detail-chip').style.color = color;
+
+  const savings = cat.avgList - cat.avgPrice;
+  const revShare = (cat.reviews / 26746708 * 100).toFixed(1);
+
+  document.getElementById('cat-detail-content').innerHTML = `
+    <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:16px">
+      <div class="metric-tile"><div><div class="metric-tile-label">Products</div><div class="metric-tile-val" style="color:${color}">${cat.products.toLocaleString()}</div></div></div>
+      <div class="metric-tile"><div><div class="metric-tile-label">Reviews</div><div class="metric-tile-val" style="color:var(--blue)">${cat.reviews>0?(cat.reviews/1e6).toFixed(2)+'M':'—'}</div></div></div>
+      <div class="metric-tile"><div><div class="metric-tile-label">Review Share</div><div class="metric-tile-val" style="color:var(--purple)">${revShare}%</div></div></div>
+      <div class="metric-tile"><div><div class="metric-tile-label">Avg Discount</div><div class="metric-tile-val" style="color:var(--red)">${cat.avgDisc}%</div></div></div>
+      <div class="metric-tile"><div><div class="metric-tile-label">Avg Rating</div><div class="metric-tile-val" style="color:var(--green)">${cat.avgRat}★</div></div></div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px">
+      <div>
+        <div style="font-size:11px;color:var(--text4);margin-bottom:8px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px">Price Analysis</div>
+        <div class="ibar-row" style="padding:0"><div class="ibar-label">Avg List Price</div><div class="ibar-val" style="color:var(--text2)">₹${cat.avgList?.toLocaleString()}</div></div>
+        <div class="ibar-row" style="padding:0"><div class="ibar-label">Avg Sale Price</div><div class="ibar-val" style="color:${color}">₹${cat.avgPrice?.toLocaleString()}</div></div>
+        <div class="ibar-row" style="padding:0"><div class="ibar-label">Avg Savings</div><div class="ibar-val" style="color:var(--green)">₹${savings?.toLocaleString()}</div></div>
+      </div>
+      <div>
+        <div style="font-size:11px;color:var(--text4);margin-bottom:8px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px">Market Position</div>
+        <div style="margin-bottom:6px"><span style="font-size:12px;color:var(--text2)">Discount tier: </span>
+          <span class="badge ${cat.avgDisc>50?'red':cat.avgDisc>35?'orange':'green'}">${cat.avgDisc>50?'Aggressive':cat.avgDisc>35?'Moderate':'Conservative'}</span>
+        </div>
+        <div><span style="font-size:12px;color:var(--text2)">Quality tier: </span>
+          <span class="badge ${cat.avgRat>=4.2?'green':cat.avgRat>=4.0?'orange':'yellow'}">${cat.avgRat>=4.2?'Premium':cat.avgRat>=4.0?'Good':'Average'}</span>
+        </div>
+      </div>
+      <div>
+        <div style="font-size:11px;color:var(--text4);margin-bottom:8px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px">Catalog Share</div>
+        <div class="hbar-row">
+          <div class="hbar-label">Products</div>
+          <div class="hbar-track"><div class="hbar-fill" style="background:${color};width:${cat.products/526*100}%"></div></div>
+          <div class="hbar-val">${(cat.products/1465*100).toFixed(1)}%</div>
+        </div>
+        <div class="hbar-row">
+          <div class="hbar-label">Reviews</div>
+          <div class="hbar-track"><div class="hbar-fill" style="background:var(--blue);width:${parseFloat(revShare)}%"></div></div>
+          <div class="hbar-val">${revShare}%</div>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+// ════════════════════════════════════════════
+// PRICING TAB
+// ════════════════════════════════════════════
+function initPricing() {
+  // Discount bar
+  const dCtx = document.getElementById('price-disc-bar').getContext('2d');
+  const discSorted = [...DATA.categories].sort((a,b)=>b.avgDisc-a.avgDisc);
+  new Chart(dCtx, {
+    type: 'bar',
+    data: {
+      labels: discSorted.map(c=>c.name),
+      datasets: [{
+        label: 'Avg Discount %',
+        data: discSorted.map(c=>c.avgDisc),
+        backgroundColor: discSorted.map(c=>c.avgDisc>50?'#DC262622':c.avgDisc>35?'#F59E0B22':'#05966922'),
+        borderColor: discSorted.map(c=>c.avgDisc>50?'#DC2626':c.avgDisc>35?'#F59E0B':'#059669'),
+        borderWidth: 2, borderRadius: 6,
+      }]
+    },
+    options: {
+      ...chartDefaults,
+      responsive:true,maintainAspectRatio:false,
+      plugins:{...chartDefaults.plugins,tooltip:{...chartDefaults.plugins.tooltip,callbacks:{label:ctx=>` ${ctx.raw}% avg discount`}}},
+      scales:{x:{grid:{display:false},ticks:{color:'#64748B',font:{size:9},maxRotation:35}},y:{grid:{color:'#F1F5F9'},ticks:{color:'#64748B'},max:70}}
+    }
+  });
+
+  // Price range
+  const pCtx = document.getElementById('price-range-chart').getContext('2d');
+  new Chart(pCtx, {
+    type: 'doughnut',
+    data: {
+      labels: DATA.priceRanges.map(p=>p.label),
+      datasets: [{
+        data: DATA.priceRanges.map(p=>p.count),
+        backgroundColor: COLORS9.slice(0,6).map(c=>c+'CC'),
+        borderColor: '#fff', borderWidth: 3, hoverOffset:6,
+      }]
+    },
+    options: {
+      responsive:true,maintainAspectRatio:false,cutout:'60%',
+      plugins:{
+        legend:{display:true,position:'bottom',labels:{color:'#64748B',font:{size:10},padding:8,boxWidth:10}},
+        tooltip:{...chartDefaults.plugins.tooltip,callbacks:{label:ctx=>`${ctx.raw} products (${DATA.priceRanges[ctx.dataIndex].pct}%)`}}
+      }
+    }
+  });
+
+  // Discount buckets ibars
+  const dbEl = document.getElementById('disc-bucket-ibars');
+  DATA.discBuckets.forEach(d => {
+    dbEl.innerHTML += `
+      <div class="ibar-row" title="${d.count} products">
+        <div class="ibar-label">${d.label}</div>
+        <div class="ibar-track"><div class="ibar-fill" style="background:${d.color}" data-w="${d.pct/36*100}%"></div></div>
+        <div class="ibar-val" style="color:${d.color}">${d.count}</div>
+      </div>`;
+  });
+
+  // Price compare chart
+  const pcCtx = document.getElementById('price-compare-chart').getContext('2d');
+  const top5cats = DATA.categories.slice(0,5);
+  new Chart(pcCtx, {
+    type: 'bar',
+    data: {
+      labels: top5cats.map(c=>c.name),
+      datasets: [
+        {label:'List Price', data:top5cats.map(c=>c.avgList), backgroundColor:'#E2E8F0', borderRadius:4},
+        {label:'Sale Price', data:top5cats.map(c=>c.avgPrice), backgroundColor:COLORS9.slice(0,5).map(c=>c+'AA'), borderRadius:4},
+      ]
+    },
+    options: {
+      ...chartDefaults,
+      responsive:true,maintainAspectRatio:false,
+      plugins:{...chartDefaults.plugins,legend:{display:true,position:'top',labels:{color:'#64748B',font:{size:10},boxWidth:10}}},
+      scales:{x:{grid:{display:false},ticks:{color:'#64748B',font:{size:9},maxRotation:35}},y:{grid:{color:'#F1F5F9'},ticks:{color:'#64748B',font:{size:10}}}}
+    }
+  });
+
+  // Savings ibars
+  const svEl = document.getElementById('savings-ibars');
+  const savSorted = [...DATA.categories].filter(c=>c.avgList>0).sort((a,b)=>(b.avgList-b.avgPrice)-(a.avgList-a.avgPrice));
+  const maxSav = Math.max(...savSorted.map(c=>c.avgList-c.avgPrice));
+  savSorted.forEach((c,i) => {
+    const sav = c.avgList - c.avgPrice;
+    svEl.innerHTML += `
+      <div class="ibar-row">
+        <div class="ibar-label">${c.name}</div>
+        <div class="ibar-track"><div class="ibar-fill" style="background:${COLORS9[i]}" data-w="${sav/maxSav*100}%"></div></div>
+        <div class="ibar-val" style="color:${COLORS9[i]}">₹${sav}</div>
+      </div>`;
+  });
+
+  animateBars();
+}
+
+// ════════════════════════════════════════════
+// RATINGS TAB
+// ════════════════════════════════════════════
+function initRatings() {
+  // Rating distribution full
+  const rdCtx = document.getElementById('rat-dist-chart').getContext('2d');
+  new Chart(rdCtx, {
+    type: 'bar',
+    data: {
+      labels: DATA.ratBuckets.map(r=>r.label),
+      datasets: [{
+        label: 'Products',
+        data: DATA.ratBuckets.map(r=>r.count),
+        backgroundColor: DATA.ratBuckets.map(r=>r.color+'33'),
+        borderColor: DATA.ratBuckets.map(r=>r.color),
+        borderWidth: 2, borderRadius: 6,
+      }]
+    },
+    options: {
+      ...chartDefaults,
+      responsive:true,maintainAspectRatio:false,
+      plugins:{...chartDefaults.plugins,tooltip:{...chartDefaults.plugins.tooltip,callbacks:{
+        title:ctx=>ctx[0].label+' Stars',
+        label:ctx=>[` ${ctx.raw} products`,` ${DATA.ratBuckets[ctx.dataIndex].pct}% of catalog`]
+      }}},
+      scales:{x:{grid:{display:false},ticks:{color:'#64748B'}},y:{grid:{color:'#F1F5F9'},ticks:{color:'#64748B'}}}
+    }
+  });
+
+  // Animate progress circles
+  setTimeout(() => {
+    ['prog1','prog2'].forEach(id => {
+      const el = document.getElementById(id);
+      const pct = parseFloat(el.dataset.pct);
+      const circumference = 201;
+      el.style.strokeDashoffset = circumference - (pct / 100) * circumference;
+    });
+  }, 200);
+
+  // Rating by category
+  const rcCtx = document.getElementById('rat-cat-chart').getContext('2d');
+  new Chart(rcCtx, {
+    type: 'bar',
+    data: {
+      labels: DATA.categories.map(c=>c.name),
+      datasets: [{
+        data: DATA.categories.map(c=>c.avgRat),
+        backgroundColor: DATA.categories.map(c=>c.avgRat>=4.2?'#05966933':c.avgRat>=4.0?'#2563EB33':'#F59E0B33'),
+        borderColor: DATA.categories.map(c=>c.avgRat>=4.2?'#059669':c.avgRat>=4.0?'#2563EB':'#F59E0B'),
+        borderWidth:2, borderRadius:6,
+      }]
+    },
+    options: {
+      ...chartDefaults,
+      responsive:true,maintainAspectRatio:false,
+      plugins:{...chartDefaults.plugins,tooltip:{...chartDefaults.plugins.tooltip,callbacks:{label:ctx=>` ${ctx.raw}★ avg rating`}}},
+      scales:{x:{grid:{display:false},ticks:{color:'#64748B',font:{size:9},maxRotation:40}},y:{grid:{color:'#F1F5F9'},ticks:{color:'#64748B'},min:3.5,max:4.6}}
+    }
+  });
+
+  // Review leaders ibars
+  const rlEl = document.getElementById('review-leaders-ibars');
+  const top8 = [...DATA.topProducts].sort((a,b)=>b.reviews-a.reviews).slice(0,8);
+  const maxR = top8[0].reviews;
+  top8.forEach((p,i) => {
+    const name = p.name.length > 28 ? p.name.slice(0,28)+'…' : p.name;
+    rlEl.innerHTML += `
+      <div class="ibar-row" title="${p.name}">
+        <div class="ibar-label" style="width:160px">${name}</div>
+        <div class="ibar-track"><div class="ibar-fill" style="background:${COLORS9[i%9]}" data-w="${p.reviews/maxR*100}%"></div></div>
+        <div class="ibar-val" style="color:${COLORS9[i%9]}">${(p.reviews/1e3).toFixed(0)}K</div>
+      </div>`;
+  });
+
+  animateBars();
+}
+
+// ════════════════════════════════════════════
+// PRODUCTS TAB
+// ════════════════════════════════════════════
+let currentFilter = 'all';
+let searchVal = '';
+
+function initProducts() {
+  renderProdTable();
+
+  document.getElementById('prod-search').addEventListener('input', (e) => {
+    searchVal = e.target.value.toLowerCase();
+    renderProdTable();
+  });
+
+  // Top 10 by reviews
+  const t10Ctx = document.getElementById('top10-reviews').getContext('2d');
+  const top10R = [...DATA.topProducts].sort((a,b)=>b.reviews-a.reviews).slice(0,10);
+  new Chart(t10Ctx, {
+    type:'bar',
+    data:{
+      labels:top10R.map(p=>p.name.length>20?p.name.slice(0,20)+'…':p.name),
+      datasets:[{
+        data:top10R.map(p=>p.reviews),
+        backgroundColor:COLORS9.map(c=>c+'33'),
+        borderColor:COLORS9,
+        borderWidth:2,borderRadius:6,
+      }]
+    },
+    options:{
+      ...chartDefaults,
+      indexAxis:'y',responsive:true,maintainAspectRatio:false,
+      plugins:{...chartDefaults.plugins,tooltip:{...chartDefaults.plugins.tooltip,callbacks:{label:ctx=>` ${ctx.raw.toLocaleString()} reviews`}}},
+      scales:{x:{grid:{color:'#F1F5F9'},ticks:{color:'#64748B',font:{size:10}}},y:{grid:{display:false},ticks:{color:'#334155',font:{size:10}}}}
+    }
+  });
+
+  // Top 10 by discount
+  const t10DCtx = document.getElementById('top10-disc').getContext('2d');
+  const top10D = [...DATA.topProducts].sort((a,b)=>b.disc-a.disc).slice(0,10);
+  new Chart(t10DCtx, {
+    type:'bar',
+    data:{
+      labels:top10D.map(p=>p.name.length>20?p.name.slice(0,20)+'…':p.name),
+      datasets:[{
+        data:top10D.map(p=>p.disc),
+        backgroundColor:top10D.map(p=>p.disc>=60?'#DC262622':p.disc>=40?'#F59E0B22':'#05966922'),
+        borderColor:top10D.map(p=>p.disc>=60?'#DC2626':p.disc>=40?'#F59E0B':'#059669'),
+        borderWidth:2,borderRadius:6,
+      }]
+    },
+    options:{
+      ...chartDefaults,
+      indexAxis:'y',responsive:true,maintainAspectRatio:false,
+      plugins:{...chartDefaults.plugins,tooltip:{...chartDefaults.plugins.tooltip,callbacks:{label:ctx=>` ${ctx.raw}% discount`}}},
+      scales:{x:{grid:{color:'#F1F5F9'},ticks:{color:'#64748B',font:{size:10}}},y:{grid:{display:false},ticks:{color:'#334155',font:{size:10}}}}
+    }
+  });
+}
+
+function filterProds(f, btn) {
+  currentFilter = f;
+  document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  renderProdTable();
+}
+
+function renderProdTable() {
+  const tbody = document.getElementById('prod-table-body');
+  tbody.innerHTML = '';
+  const filtered = DATA.topProducts.filter(p => {
+    const matchCat = currentFilter === 'all' || p.cat.includes(currentFilter);
+    const matchSearch = !searchVal || p.name.toLowerCase().includes(searchVal) || p.cat.toLowerCase().includes(searchVal);
+    return matchCat && matchSearch;
+  });
+  if (filtered.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;padding:24px;color:var(--text4)">No products match your filters.</td></tr>';
+    return;
+  }
+  filtered.forEach((p, i) => {
+    const savings = p.listPrice - p.salePrice;
+    const rankCls = p.rank===1?'g1':p.rank===2?'g2':p.rank===3?'g3':'';
+    const discCls = p.disc>=60?'red':p.disc>=40?'orange':p.disc>=20?'yellow':'green';
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td><span class="rank-num ${rankCls}">${p.rank}</span></td>
+      <td><div class="prod-name-cell" title="${p.name}">${p.name}</div></td>
+      <td><span style="font-size:11px;color:var(--text3)">${p.cat}</span></td>
+      <td><span class="star">★</span> <strong>${p.rat}</strong></td>
+      <td><span style="font-family:'JetBrains Mono',monospace;font-size:12px">${(p.reviews/1000).toFixed(0)}K</span></td>
+      <td><strong style="color:var(--text)">₹${p.salePrice.toLocaleString()}</strong></td>
+      <td><span style="color:var(--text4);text-decoration:line-through;font-size:12px">₹${p.listPrice.toLocaleString()}</span></td>
+      <td><span class="badge ${discCls}">${p.disc}% off</span></td>
+      <td><span style="color:var(--green);font-weight:700;font-size:12px">₹${savings.toLocaleString()}</span></td>
+    `;
+    tr.onclick = () => showProdDrill(p);
+    tbody.appendChild(tr);
+  });
+}
+
+function showProdDrill(p) {
+  const savings = p.listPrice - p.salePrice;
+  document.getElementById('prod-drill-title').textContent = p.name;
+  document.getElementById('prod-drill-content').innerHTML = `
+    <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:12px">
+      <div class="metric-tile"><div><div class="metric-tile-label">Category</div><div style="font-size:13px;font-weight:700;color:var(--text)">${p.cat}</div></div></div>
+      <div class="metric-tile"><div><div class="metric-tile-label">Rating</div><div class="metric-tile-val" style="color:var(--green)">${p.rat}★</div></div></div>
+      <div class="metric-tile"><div><div class="metric-tile-label">Reviews</div><div class="metric-tile-val" style="color:var(--blue)">${p.reviews.toLocaleString()}</div></div></div>
+      <div class="metric-tile"><div><div class="metric-tile-label">Sale Price</div><div class="metric-tile-val" style="color:var(--amazon)">₹${p.salePrice.toLocaleString()}</div></div></div>
+      <div class="metric-tile"><div><div class="metric-tile-label">You Save</div><div class="metric-tile-val" style="color:var(--green)">₹${savings.toLocaleString()}</div></div></div>
+    </div>
+    <div style="margin-top:12px;background:var(--bg);border-radius:8px;padding:12px">
+      <div style="font-size:12px;color:var(--text3);margin-bottom:6px">Price breakdown</div>
+      <div class="hbar-row">
+        <div class="hbar-label">Sale Price</div>
+        <div class="hbar-track" style="height:12px"><div class="hbar-fill" style="background:var(--amazon);height:100%;width:${p.salePrice/p.listPrice*100}%"></div></div>
+        <div class="hbar-val">₹${p.salePrice.toLocaleString()}</div>
+      </div>
+      <div class="hbar-row">
+        <div class="hbar-label">Savings</div>
+        <div class="hbar-track" style="height:12px"><div class="hbar-fill" style="background:var(--green);height:100%;width:${savings/p.listPrice*100}%"></div></div>
+        <div class="hbar-val">₹${savings.toLocaleString()}</div>
+      </div>
+    </div>
+  `;
+  document.getElementById('prod-drill').classList.add('open');
+}
+
+// ════════════════════════════════════════════
+// INSIGHTS TAB
+// ════════════════════════════════════════════
+function initInsights() {
+  // Insight disc bars
+  const idEl = document.getElementById('insight-disc-bars');
+  const topDisc = [...DATA.categories].sort((a,b)=>b.avgDisc-a.avgDisc).slice(0,5);
+  topDisc.forEach((c,i) => {
+    idEl.innerHTML += `
+      <div class="ibar-row">
+        <div class="ibar-label">${c.name}</div>
+        <div class="ibar-track"><div class="ibar-fill" style="background:${COLORS9[i]}" data-w="${c.avgDisc/60*100}%"></div></div>
+        <div class="ibar-val" style="color:${COLORS9[i]}">${c.avgDisc}%</div>
+      </div>`;
+  });
+
+  // Quality pie
+  const qCtx = document.getElementById('insight-quality').getContext('2d');
+  new Chart(qCtx, {
+    type:'pie',
+    data:{
+      labels:['≥4★ (63.4%)','3.5–4★ (31.9%)','<3.5★ (4.7%)'],
+      datasets:[{data:[929,467,69],backgroundColor:['#05966988','#2563EB88','#DC262688'],borderColor:'#fff',borderWidth:3}]
+    },
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:true,position:'bottom',labels:{color:'#64748B',font:{size:10},padding:8}}}}
+  });
+
+  // Concentration
+  const cCtx = document.getElementById('insight-conc').getContext('2d');
+  new Chart(cCtx, {
+    type:'doughnut',
+    data:{
+      labels:['Electronics (35.9%)','Computers (30.9%)','Home & Kitchen (30.6%)','Others (2.6%)'],
+      datasets:[{data:[526,453,448,38],backgroundColor:['#FF6A00BB','#2563EBBB','#059669BB','#94A3B8BB'],borderColor:'#fff',borderWidth:3}]
+    },
+    options:{responsive:true,maintainAspectRatio:false,cutout:'55%',plugins:{legend:{display:true,position:'bottom',labels:{color:'#64748B',font:{size:10},padding:6,boxWidth:8}}}}
+  });
+
+  // Scatter: Discount vs Rating
+  const scCtx = document.getElementById('insight-scatter').getContext('2d');
+  const scatterData = DATA.topProducts.map((p,i) => ({
+    x: p.disc,
+    y: p.rat,
+    r: Math.sqrt(p.reviews/1000)
+  }));
+  new Chart(scCtx, {
+    type:'bubble',
+    data:{
+      datasets:[{
+        label:'Products',
+        data: scatterData,
+        backgroundColor: COLORS9.map(c=>c+'55'),
+        borderColor: COLORS9,
+        borderWidth:1.5,
+      }]
+    },
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      plugins:{...chartDefaults.plugins,tooltip:{...chartDefaults.plugins.tooltip,callbacks:{
+        label:ctx=>{
+          const p=DATA.topProducts[ctx.dataIndex];
+          return [`${p.name.slice(0,30)}`,`Discount: ${p.disc}%  Rating: ${p.rat}★`,`Reviews: ${p.reviews.toLocaleString()}`];
+        }
+      }}},
+      scales:{
+        x:{title:{display:true,text:'Discount (%)',color:'#64748B',font:{size:11}},grid:{color:'#F1F5F9'},ticks:{color:'#64748B'}},
+        y:{title:{display:true,text:'Rating (★)',color:'#64748B',font:{size:11}},grid:{color:'#F1F5F9'},ticks:{color:'#64748B'},min:3,max:5}
+      }
+    }
+  });
+
+  // Opportunities list
+  const oppEl = document.getElementById('opportunities-list');
+  DATA.opportunities.forEach(o => {
+    oppEl.innerHTML += `
+      <div class="metric-tile" style="margin-bottom:10px;align-items:flex-start;gap:12px">
+        <div style="font-size:26px;flex-shrink:0">${o.icon}</div>
+        <div>
+          <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:3px">${o.title}</div>
+          <div style="font-size:12px;color:var(--text3);line-height:1.5">${o.desc}</div>
+        </div>
+      </div>`;
+  });
+
+  animateBars();
+}
+
+// ════════════════════════════════════════════
+// ANIMATE BARS
+// ════════════════════════════════════════════
+function animateBars() {
+  setTimeout(() => {
+    document.querySelectorAll('.ibar-fill[data-w], .hbar-fill[data-w], .star-bar-fill[data-w]').forEach(el => {
+      if (!el.dataset.animated) {
+        el.style.width = el.dataset.w;
+        el.dataset.animated = '1';
+      }
+    });
+  }, 100);
+}
+
+// Initial bar animation
+setTimeout(animateBars, 300);
+</script>
+</body>
+</html>
